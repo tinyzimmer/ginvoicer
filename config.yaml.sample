@@ -1,0 +1,42 @@
+invoicePrefix: "INV-"
+zeroPadding: 3
+invoiceDirectory: ~/Documents/Invoices
+
+payee:
+  name: TINYZIMMERTECH LTD
+  address: "1945 DANCING DOVE LANE"
+  city: "SEATTLE"
+  state: "WASHINGTON"
+  zipCode: "98101"
+  country: "UNITED STATES"
+  registrationNo: "000111222"
+  bankAccount:
+    accountNumber: "0000 0000 0000 0000"
+    routingNumber: "000000000"
+    name: PrivateBank
+    address: 2169 Dale Avenue
+    city: Seattle
+    state: WA
+    zipCode: "98101"
+    country: "United States"
+
+payers:
+
+  - name: "My Client"
+    address: "4155 Conifer Drive"
+    city: "SEATTLE"
+    state: "WASHINGTON"
+    zipCode: "98115"
+    country: "UNITED STATES"
+    alias: my-client
+    email: client@example.com
+
+billables:
+
+  - alias: hourly
+    description: Hourly Work
+    unitPrice: 80
+
+  - alias: monthly
+    description: Monthly Work
+    unitPrice: 8000

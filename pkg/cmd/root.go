@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -16,7 +17,7 @@ var (
 	outFile       string
 	configFile    string
 	payer         string
-	invoiceNumber string
+	invoiceNumber int
 	billables     map[string]int
 	dueIn         time.Duration
 )
@@ -24,15 +25,14 @@ var (
 func init() {
 	flags := generateCommand.Flags()
 
-	flags.StringVarP(&configFile, "config", "c", "config.yaml", "path to a configuration file")
+	flags.StringVarP(&configFile, "config", "c", types.DefaultConfigPath, "path to a configuration file")
 	flags.StringVarP(&payer, "payer", "p", "", "payer (by name or alias) to generate the invoice for")
-	flags.StringVarP(&invoiceNumber, "number", "n", "", "invoice number")
+	flags.IntVarP(&invoiceNumber, "number", "n", -1, "invoice number (default: auto-increment)")
 	flags.DurationVarP(&dueIn, "due-in", "d", time.Hour*24*7, "time until invoice is due")
 	flags.StringVarP(&outFile, "output", "o", "", "path to write the invoice to")
 	flags.StringToIntVarP(&billables, "item", "i", map[string]int{}, "items to add to the invoice in the format of alias=quantity")
 
 	cobra.MarkFlagRequired(flags, "payer")
-	cobra.MarkFlagRequired(flags, "number")
 
 	rootCommand.AddCommand(generateCommand)
 }
@@ -49,12 +49,8 @@ var generateCommand = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate an invoice",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		configBytes, err := ioutil.ReadFile(configFile)
+		config, err := loadConfig()
 		if err != nil {
-			return err
-		}
-		var config types.Config
-		if err := yaml.Unmarshal(configBytes, &config); err != nil {
 			return err
 		}
 
@@ -70,6 +66,10 @@ var generateCommand = &cobra.Command{
 		}
 		if payerEntity == nil {
 			return fmt.Errorf("no payer found by the name %q", payer)
+		}
+
+		if invoiceNumber == -1 {
+			invoiceNumber = config.GetNextInvoiceNumber()
 		}
 
 		invoiceItems := make(types.BillableList, 0)
@@ -95,8 +95,10 @@ var generateCommand = &cobra.Command{
 			return err
 		}
 
+		invoiceNumberStr := config.FormatInvoiceNumber(invoiceNumber)
+
 		invoiceInfo := &types.InvoiceDetails{
-			InvoiceNumber: invoiceNumber,
+			InvoiceNumber: invoiceNumberStr,
 			InvoiceDate:   time.Now(),
 			Payee:         config.Payee,
 			Payer:         payerEntity,
@@ -110,7 +112,10 @@ var generateCommand = &cobra.Command{
 
 		output := outFile
 		if output == "" {
-			output = fmt.Sprintf("%s.pdf", invoiceNumber)
+			output = fmt.Sprintf("%s.pdf", invoiceNumberStr)
+		}
+		if config.InvoiceDirectory != "" {
+			output = filepath.Join(config.InvoiceDirectory, output)
 		}
 
 		if err := builder.WriteFile(output); err != nil {
@@ -120,4 +125,13 @@ var generateCommand = &cobra.Command{
 		fmt.Println("Invoice written to", output)
 		return nil
 	},
+}
+
+func loadConfig() (*types.Config, error) {
+	configBytes, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+	config := &types.Config{}
+	return config, yaml.Unmarshal(configBytes, config)
 }
