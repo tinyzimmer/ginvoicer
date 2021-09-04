@@ -10,6 +10,7 @@ type Builder interface {
 
 	BuildInvoice(*InvoiceDetails) error
 	WriteFile(path string) error
+	BuildAndWriteInvoice(info *InvoiceDetails, outpath string) error
 }
 
 // InvoiceDetails represents the details required for

@@ -9,9 +9,8 @@ import (
 
 type pdfBuilder struct {
 	*gopdf.GoPdf
+	*builder
 
-	currency                 string
-	fontFamily               types.FontFamily
 	hpad, vpad               float64
 	headerTextSize, textSize int
 	pageWidth, pageHeight    float64
@@ -23,20 +22,19 @@ func newPDFBuilder() (*pdfBuilder, error) {
 	pdf.Start(cfg)
 	pdf.AddPage()
 	return &pdfBuilder{
-		GoPdf:          pdf,
+		GoPdf: pdf,
+		builder: &builder{
+			currency:   "USD",
+			fontFamily: types.FontFamilyHack,
+		},
 		headerTextSize: 26,
 		textSize:       9,
 		vpad:           75,
 		hpad:           50,
-		currency:       "USD",
-		fontFamily:     types.FontFamilyHack,
 		pageWidth:      cfg.PageSize.W,
 		pageHeight:     cfg.PageSize.H,
 	}, nil
 }
-
-func (p *pdfBuilder) SetFontFamily(family types.FontFamily) { p.fontFamily = family }
-func (p *pdfBuilder) SetCurrency(currency string)           { p.currency = currency }
 
 func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 	p.SetX(p.hpad)
@@ -95,3 +93,10 @@ func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 }
 
 func (p *pdfBuilder) WriteFile(path string) error { return p.WritePdf(path) }
+
+func (p *pdfBuilder) BuildAndWriteInvoice(info *types.InvoiceDetails, outpath string) error {
+	if err := p.BuildInvoice(info); err != nil {
+		return err
+	}
+	return p.WriteFile(outpath)
+}
