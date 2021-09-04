@@ -339,7 +339,7 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 		p.SetY(p.GetY() + p.verticalPadding(font))
 		p.Text("Routing: " + info.Payee.BankAccount.RoutingNumber)
 
-		for _, line := range strings.Split(info.Payee.BankAccount.Address, "\n") {
+		for _, line := range info.Payee.BankAccount.Strings() {
 			p.SetX(p.pageWidth/4 + p.horizontalPadding(font)*2)
 			p.SetY(p.GetY() + p.verticalPadding(font))
 			p.Text(line)
@@ -355,7 +355,7 @@ func (p *pdfBuilder) writeFooter(info *types.InvoiceDetails, font fonts.Font) er
 	if err := p.setRegular(p.textSize - 2); err != nil {
 		return err
 	}
-	return p.Text(fmt.Sprintf("Company Registration No: %s. Registered Office: %s", info.Payee.RegistrationNo, info.Payee.AddressString()))
+	return p.Text(fmt.Sprintf("Company Registration No: %s. Registered Office: %s", info.Payee.RegistrationNo, info.Payee.Address.String()))
 }
 
 func (p *pdfBuilder) horizontalPadding(font fonts.Font) float64 {

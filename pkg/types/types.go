@@ -50,71 +50,77 @@ type Config struct {
 }
 
 type Entity struct {
+	*Address `json:",inline" yaml:",inline"`
+
 	Alias          string       `json:"alias" yaml:"alias"`
-	Name           string       `json:"name" yaml:"name"`
-	Address        string       `json:"address" yaml:"address"`
-	Address2       string       `json:"address2" yaml:"address2"`
-	City           string       `json:"city" yaml:"city"`
-	State          string       `json:"state" yaml:"state"`
-	ZipCode        string       `json:"zipCode" yaml:"zipCode"`
-	Country        string       `json:"country" yaml:"country"`
-	RegistrationNo string       `json:"registrationNo" yaml:"registrationNo"`
 	BankAccount    *BankAccount `json:"bankAccount" yaml:"bankAccount"`
+	RegistrationNo string       `json:"registrationNo" yaml:"registrationNo"`
 	Email          string       `json:"email" yaml:"email"`
 }
 
 type BankAccount struct {
+	*Address `json:",inline" yaml:",inline"`
+
 	AccountNumber string `json:"accountNumber" yaml:"accountNumber"`
 	RoutingNumber string `json:"routingNumber" yaml:"routingNumber"`
-	Address       string `json:"address" yaml:"address"`
 }
 
-func (e *Entity) AddressString() string {
+type Address struct {
+	Name     string `json:"name" yaml:"name"`
+	Address  string `json:"address" yaml:"address"`
+	Address2 string `json:"address2" yaml:"address2"`
+	City     string `json:"city" yaml:"city"`
+	State    string `json:"state" yaml:"state"`
+	ZipCode  string `json:"zipCode" yaml:"zipCode"`
+	Country  string `json:"country" yaml:"country"`
+}
+
+func (a *Address) String() string {
 	var sb strings.Builder
-	if e.Address != "" {
-		sb.WriteString(e.Address)
+	if a.Address != "" {
+		sb.WriteString(a.Address)
 	}
-	if e.Address2 != "" {
-		sb.WriteString(", " + e.Address2)
+	if a.Address2 != "" {
+		sb.WriteString(", " + a.Address2)
 	}
-	if e.City != "" {
-		sb.WriteString(", " + e.City)
+	if a.City != "" {
+		sb.WriteString(", " + a.City)
 	}
-	if e.State != "" {
-		sb.WriteString(", " + e.State)
+	if a.State != "" {
+		sb.WriteString(", " + a.State)
 	}
-	if e.ZipCode != "" {
-		sb.WriteString(", " + e.ZipCode)
+	if a.ZipCode != "" {
+		sb.WriteString(", " + a.ZipCode)
 	}
-	if e.Country != "" {
-		sb.WriteString(", " + e.Country)
+	if a.Country != "" {
+		sb.WriteString(", " + a.Country)
 	}
 	return sb.String()
 }
 
-func (e *Entity) Strings() []string {
+func (a *Address) Strings() []string {
 	out := make([]string, 0)
-	if e.Name != "" {
-		out = append(out, strings.Split(e.Name, "\n")...)
+	if a.Name != "" {
+		out = append(out, strings.Split(a.Name, "\n")...)
 	}
-	if e.Address != "" {
-		out = append(out, e.Address)
+	if a.Address != "" {
+		out = append(out, a.Address)
 	}
-	if e.Address2 != "" {
-		out = append(out, e.Address2)
+	if a.Address2 != "" {
+		out = append(out, a.Address2)
 	}
-	if e.City != "" || e.State != "" || e.ZipCode != "" {
-		out = append(out, strings.Replace(fmt.Sprintf("%s %s %s", e.City, e.State, e.ZipCode), "  ", " ", -1))
+	if a.City != "" || a.State != "" || a.ZipCode != "" {
+		out = append(out, strings.Replace(fmt.Sprintf("%s %s %s", a.City, a.State, a.ZipCode), "  ", " ", -1))
 	}
-	if e.Country != "" {
-		out = append(out, e.Country)
+	if a.Country != "" {
+		out = append(out, a.Country)
 	}
 	return out
 }
 
 func (e *Entity) TextWidth() float64 {
 	var max float64
-	for _, s := range e.Strings() {
+	for _, s := range e.Address.Strings() {
 		if float64(len(s)) > max {
 			max = float64(len(s))
 		}

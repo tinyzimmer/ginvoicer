@@ -81,7 +81,7 @@ func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 	p.SetLineType("dashed")
 	p.SetStrokeColor(0, 0, 0)
 	p.SetY(p.pageHeight - (p.pageHeight / 3))
-	p.Line(p.hpad, p.GetY(), p.pageWidth-p.horizontalPadding(font)*2+float64(p.textSize)*2, p.GetY())
+	p.Line(p.hpad-p.horizontalPadding(font)/2, p.GetY(), p.pageWidth-p.horizontalPadding(font)*1.5+float64(p.textSize)*2, p.GetY())
 
 	p.SetX(p.hpad)
 	p.SetY(p.GetY() + 30)
