@@ -23,7 +23,7 @@ payee:
 payers:
 
   - name: "My Client"
-    address: "4155 Conifer Drive"
+    address: "4155 CONIFER DRIVE"
     city: "SEATTLE"
     state: "WASHINGTON"
     zipCode: "98115"
