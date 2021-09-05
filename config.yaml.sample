@@ -3,12 +3,12 @@ zeroPadding: 3
 invoiceDirectory: ~/Documents/Invoices
 
 payee:
-  name: TINYZIMMERTECH LTD
-  address: "1945 DANCING DOVE LANE"
-  city: "SEATTLE"
-  state: "WASHINGTON"
+  name: TinyZimmerTech LTD
+  address: "1945 Dancing Dove Lane"
+  city: "Seattle"
+  state: "Washington"
   zipCode: "98101"
-  country: "UNITED STATES"
+  country: "United States"
   registrationNo: "000111222"
   bankAccount:
     accountNumber: "0000 0000 0000 0000"
@@ -23,13 +23,12 @@ payee:
 payers:
 
   - name: "My Client"
-    address: "4155 CONIFER DRIVE"
-    city: "SEATTLE"
-    state: "WASHINGTON"
+    address: "4155 Conifer Drive"
+    city: "Seattle"
+    state: "Washington"
     zipCode: "98115"
-    country: "UNITED STATES"
+    country: "United States"
     alias: my-client
-    email: client@example.com
 
 billables:
 

@@ -10,8 +10,9 @@ type Entity struct {
 
 	Alias          string       `json:"alias" yaml:"alias"`
 	BankAccount    *BankAccount `json:"bankAccount" yaml:"bankAccount"`
-	RegistrationNo string       `json:"registrationNo" yaml:"registrationNo"`
-	Email          string       `json:"email" yaml:"email"`
+	PayLinks       []string
+	RegistrationNo string `json:"registrationNo" yaml:"registrationNo"`
+	Email          string `json:"email" yaml:"email"`
 }
 
 type BankAccount struct {

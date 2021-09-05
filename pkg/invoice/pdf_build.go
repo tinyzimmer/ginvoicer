@@ -26,7 +26,7 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 		return
 	}
 	for _, line := range info.Payer.Strings() {
-		if err = p.Text(line); err != nil {
+		if err = p.Text(strings.ToUpper(line)); err != nil {
 			return
 		}
 		p.SetX(p.hpad + p.horizontalPadding(font)/2)
@@ -72,7 +72,7 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 	p.SetX(p.pageWidth - p.hpad - info.Payee.TextWidth() - p.horizontalPadding(font)*2.5)
 
 	for _, line := range info.Payee.Strings() {
-		if err = p.Text(line); err != nil {
+		if err = p.Text(strings.ToUpper(line)); err != nil {
 			return
 		}
 		p.SetX(p.pageWidth - p.hpad - info.Payee.TextWidth() - p.horizontalPadding(font)*2.5)
@@ -243,7 +243,7 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 	p.SetY(startY)
 
 	for _, line := range info.Payee.Strings() {
-		if err = p.Text(line); err != nil {
+		if err = p.Text(strings.ToUpper(line)); err != nil {
 			return
 		}
 		p.SetX(p.hpad + p.horizontalPadding(font))
