@@ -27,6 +27,14 @@ func GetFont(family types.FontFamily) (Font, error) {
 		return &anonymousPro{}, nil
 	case types.FontFamilyUbuntuMono:
 		return &ubuntuMono{}, nil
+	case types.FontFamilyGoMono:
+		return &goMono{}, nil
+	case types.FontFamilySpaceMono:
+		return &spaceMono{}, nil
+	case types.FontFamilyLiberationMono:
+		return &liberationMono{}, nil
+	case types.FontFamilyLuxiMono:
+		return &luxiMono{}, nil
 	default:
 		return nil, fmt.Errorf("unrecognized font family: %s", family)
 	}
