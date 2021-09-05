@@ -22,12 +22,8 @@ func init() {
 var DefaultConfigPath string
 
 type Config struct {
-	// A prefix appended to invoice numbers
-	InvoicePrefix string `json:"invoicePrefix" yaml:"invoicePrefix"`
-	// A directory to store invoices by default
-	InvoiceDirectory string `json:"invoiceDirectory" yaml:"invoiceDirectory"`
-	// The number of zeroes to pad invoice numbers with
-	ZeroPadding int `json:"zeroPadding" yaml:"zeroPadding"`
+	// The configuration for invoices
+	Invoices InvoicesConfig `json:"invoices" yaml:"invoices"`
 	// The entity issuing invoices
 	Payee *Entity `json:"payee" yaml:"payee"`
 	// Entities eligible for invoicing.
@@ -36,17 +32,28 @@ type Config struct {
 	Billables BillableList `json:"billables" yaml:"billables"`
 }
 
+type InvoicesConfig struct {
+	// A prefix appended to invoice numbers
+	Prefix string `json:"prefix" yaml:"prefix"`
+	// A directory to store invoices by default
+	Directory string `json:"directory" yaml:"directory"`
+	// The font family to use for invoices
+	FontFamily FontFamily `json:"fontFamily" yaml:"fontFamily"`
+	// The number of zeroes to pad invoice numbers with
+	ZeroPadding int `json:"zeroPadding" yaml:"zeroPadding"`
+}
+
 func (c *Config) FormatInvoiceNumber(num int) string {
-	numFmt := fmt.Sprintf("%%0%dd", c.ZeroPadding+1)
+	numFmt := fmt.Sprintf("%%0%dd", c.Invoices.ZeroPadding+1)
 	numStr := fmt.Sprintf(numFmt, num)
-	if c.InvoicePrefix != "" {
-		return fmt.Sprintf("%s%s", c.InvoicePrefix, numStr)
+	if c.Invoices.Prefix != "" {
+		return fmt.Sprintf("%s%s", c.Invoices.Prefix, numStr)
 	}
 	return numStr
 }
 
 func (c *Config) GetNextInvoiceNumber() int {
-	path := c.InvoiceDirectory
+	path := c.Invoices.Directory
 	if path == "" {
 		var err error
 		path, err = os.Getwd()
@@ -66,13 +73,13 @@ func (c *Config) GetNextInvoiceNumber() int {
 
 		// Strip any prefix
 		nameFull := filepath.Base(path)
-		if c.InvoicePrefix != "" {
+		if c.Invoices.Prefix != "" {
 			// We are using a prefix and this file doesn't have one.
 			// No need for further checks.
-			if !strings.HasPrefix(nameFull, c.InvoicePrefix) {
+			if !strings.HasPrefix(nameFull, c.Invoices.Prefix) {
 				return nil
 			}
-			nameFull = strings.TrimPrefix(nameFull, c.InvoicePrefix)
+			nameFull = strings.TrimPrefix(nameFull, c.Invoices.Prefix)
 		}
 
 		// Strip any extension

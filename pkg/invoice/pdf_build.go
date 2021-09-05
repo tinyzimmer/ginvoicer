@@ -10,7 +10,7 @@ import (
 
 func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (err error) {
 	// Invoice in big text
-	if err = p.setRegular(p.headerTextSize); err != nil {
+	if err = p.setRegular(font.HeaderSize()); err != nil {
 		return
 	}
 	if err = p.Text("INVOICE"); err != nil {
@@ -18,11 +18,11 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 	}
 
 	p.SetX(p.hpad + p.horizontalPadding(font)/2)
-	p.SetY(p.vpad + float64(p.headerTextSize))
+	p.SetY(p.vpad + float64(font.HeaderSize()))
 
 	// Write payer info below the heading
 
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 	for _, line := range info.Payer.Strings() {
@@ -30,37 +30,37 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 			return
 		}
 		p.SetX(p.hpad + p.horizontalPadding(font)/2)
-		p.SetY(p.GetY() + float64(p.textSize+4))
+		p.SetY(p.GetY() + float64(font.TextSize()+4))
 	}
 
 	// Write invoice info
 
 	p.SetY(p.vpad)
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
-	if err = p.setBold(p.textSize); err != nil {
+	if err = p.setBold(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text("Invoice Date"); err != nil {
 		return
 	}
 
-	p.SetY(p.GetY() + float64(p.textSize) + p.verticalPadding(font)*2)
+	p.SetY(p.GetY() + float64(font.TextSize()) + p.verticalPadding(font)*2)
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
 	if err = p.Text("Invoice Number"); err != nil {
 		return
 	}
 
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 
-	p.SetY(p.vpad + float64(p.textSize) + 2)
+	p.SetY(p.vpad + float64(font.TextSize()) + 2)
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
 	if err = p.Text(info.InvoiceDate.Format("2 Jan 2006")); err != nil {
 		return
 	}
 
-	p.SetY(p.GetY() + float64(p.textSize) + p.verticalPadding(font)*2)
+	p.SetY(p.GetY() + float64(font.TextSize()) + p.verticalPadding(font)*2)
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
 	if err = p.Text(info.InvoiceNumber); err != nil {
 		return
@@ -76,7 +76,7 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 			return
 		}
 		p.SetX(p.pageWidth - p.hpad - info.Payee.TextWidth() - p.horizontalPadding(font)*2.5)
-		p.SetY(p.GetY() + float64(p.textSize+4))
+		p.SetY(p.GetY() + float64(font.TextSize()+4))
 	}
 
 	return
@@ -84,7 +84,7 @@ func (p *pdfBuilder) writeHeader(info *types.InvoiceDetails, font fonts.Font) (e
 
 func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Font) (err error) {
 	// Write the invoice table header
-	if err = p.setBold(p.textSize); err != nil {
+	if err = p.setBold(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text("Description"); err != nil {
@@ -113,7 +113,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 	}
 	p.SetY(p.vpad + p.pageHeight/5)
 	amountText := fmt.Sprintf("Amount %s", p.currency)
-	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*1.3)
+	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*1.75)
 	if err = p.Text(amountText); err != nil {
 		return
 	}
@@ -121,68 +121,144 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 	// Place a divider under the header
 	p.SetLineWidth(1)
 	p.SetStrokeColor(96, 96, 96)
-	p.Line(p.hpad, p.GetY()+7, p.pageWidth-p.horizontalPadding(font)*1.7+float64(p.textSize)*2, p.GetY()+7)
+	p.Line(p.hpad, p.GetY()+7, p.pageWidth-p.horizontalPadding(font), p.GetY()+7)
 
 	// Write out the invoice items
 	p.SetY(p.GetY() + 25)
 	p.SetX(p.hpad)
 	p.SetStrokeColor(184, 184, 184)
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 	for _, item := range info.Items {
+		var textWidth float64
+
 		baseY := p.GetY()
+
 		if err = p.Text(item.Description); err != nil {
 			return
 		}
+		textWidth, err = p.MeasureTextWidth(item.Description)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() - textWidth)
 
+		var thisTextWidth, maxTextWidth float64
 		var text string
-		var max int
+		var max string
+
+		// Quantity
 
 		p.SetY(baseY)
 		text = item.FormattedQuantity()
-		max = info.Items.MaxQuantitySize()
-		p.SetX(p.hpad + (p.horizontalPadding(font) * float64(p.textSize) * 0.6) + float64(max-len(text))*(float64(p.textSize)/2))
+		max = info.Items.LongestQuantity()
+		thisTextWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		maxTextWidth, err = p.MeasureTextWidth(max)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() + p.horizontalPadding(font)*5.4 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
+		textWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() - textWidth - (maxTextWidth - thisTextWidth))
+
+		// Unit Price
 
 		p.SetY(baseY)
 		text = item.FormattedUnitPrice()
-		max = info.Items.MaxUnitPriceSize()
-		p.SetX(p.hpad + (p.horizontalPadding(font) * float64(p.textSize) * 0.92) + float64(max-len(text))*(float64(p.textSize)/2))
-		if len(text) > 6 {
-			p.SetX(p.GetX() - p.horizontalPadding(font)/2)
+		max = info.Items.LongestUnitPrice()
+		thisTextWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
 		}
+		maxTextWidth, err = p.MeasureTextWidth(max)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() + p.horizontalPadding(font)*2 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
+		textWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() - textWidth - (maxTextWidth - thisTextWidth))
+
+		// Discount
 
 		p.SetY(baseY)
 		text = item.FormattedDiscount()
-		max = info.Items.MaxDiscountSize()
-		p.SetX(p.hpad + (p.horizontalPadding(font) * float64(p.textSize) * 1.15) + float64(max-len(text))*(float64(p.textSize)/2))
+		max = info.Items.LongestDiscount()
+		thisTextWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		maxTextWidth, err = p.MeasureTextWidth(max)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() + p.horizontalPadding(font)*2.8 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
+		textWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() - textWidth - (maxTextWidth - thisTextWidth))
+
+		// Tax
 
 		p.SetY(baseY)
 		text = item.FormattedTax()
-		max = info.Items.MaxTaxSize()
-		p.SetX(p.hpad + (p.horizontalPadding(font) * float64(p.textSize) * 1.30) + float64(max-len(text))*(float64(p.textSize)/2))
+		max = info.Items.LongestTax()
+		thisTextWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		maxTextWidth, err = p.MeasureTextWidth(max)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() + p.horizontalPadding(font)*1.4 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
+		textWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		p.SetX(p.GetX() - textWidth - (maxTextWidth - thisTextWidth))
+
+		// Subtotal
 
 		p.SetY(baseY)
 		text = item.FormattedSubtotal()
-		max = info.Items.MaxSubtotalSize()
-		p.SetX(p.hpad + (p.horizontalPadding(font) * float64(p.textSize) * 1.545) + float64(max-len(text))*(float64(p.textSize)/2))
+		max = info.Items.LongestSubtotal()
+		thisTextWidth, err = p.MeasureTextWidth(text)
+		if err != nil {
+			return
+		}
+		maxTextWidth, err = p.MeasureTextWidth(max)
+		if err != nil {
+			return
+		}
+		p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*1.6 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
 
-		p.Line(p.hpad, p.GetY()+10, p.pageWidth-p.horizontalPadding(font)*1.7+float64(p.textSize)*2, p.GetY()+10)
+		p.Line(p.hpad, p.GetY()+10, p.pageWidth-p.horizontalPadding(font), p.GetY()+10)
 		p.SetY(p.GetY() + 25)
 		p.SetX(p.hpad)
 	}
@@ -191,7 +267,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 
 	p.SetY(p.GetY() + 10)
 
-	p.SetX(p.hpad + p.horizontalPadding(font)*11.5)
+	p.SetX(p.hpad + p.pageWidth*.67)
 	if err = p.Text("Subtotal"); err != nil {
 		return
 	}
@@ -201,11 +277,11 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 	}
 
 	p.SetStrokeColor(96, 96, 96)
-	p.Line(p.pageWidth/2, p.GetY()+10, p.pageWidth-p.horizontalPadding(font)*1.75+float64(p.textSize)*2, p.GetY()+10)
+	p.Line(p.pageWidth/2, p.GetY()+10, p.pageWidth-p.horizontalPadding(font), p.GetY()+10)
 
 	p.SetY(p.GetY() + 30)
-	p.SetX(p.hpad + p.horizontalPadding(font)*11.5 - float64(p.textSize)/1.8)
-	if err = p.setBold(p.textSize); err != nil {
+	p.SetX(p.hpad + p.pageWidth*.67 - float64(font.TextSize())/1.8)
+	if err = p.setBold(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text(fmt.Sprintf("TOTAL %s", p.currency)); err != nil {
@@ -220,7 +296,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 }
 
 func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.Font) (err error) {
-	if err = p.setRegular(p.headerTextSize - 4); err != nil {
+	if err = p.setRegular(font.HeaderSize() - 4); err != nil {
 		return
 	}
 	if err = p.Text("PAYMENT ADVICE"); err != nil {
@@ -228,11 +304,11 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 	}
 
 	p.SetX(p.hpad + p.horizontalPadding(font)/4)
-	startY := p.GetY() + float64(p.headerTextSize)
+	startY := p.GetY() + float64(font.HeaderSize())
 	p.SetY(startY)
 
 	// Write payee info again
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 
@@ -247,14 +323,14 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 			return
 		}
 		p.SetX(p.hpad + p.horizontalPadding(font))
-		p.SetY(p.GetY() + float64(p.textSize+4))
+		p.SetY(p.GetY() + float64(font.TextSize()+4))
 	}
 
 	// Write out payer info and details
 
 	p.SetY(p.pageHeight - (p.pageHeight / 3) + 20)
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
-	if err = p.setBold(p.textSize); err != nil {
+	if err = p.setBold(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text("Customer"); err != nil {
@@ -262,31 +338,31 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 	}
 
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67)
 	if err = p.Text("Invoice Number"); err != nil {
 		return
 	}
 
 	p.SetLineType("")
 	p.SetStrokeColor(156, 156, 156)
-	p.Line(p.pageWidth-p.hpad-p.pageWidth/3, p.GetY()+7, p.pageWidth-p.horizontalPadding(font)*1.75+float64(p.textSize)*2, p.GetY()+7)
+	p.Line(p.pageWidth-p.hpad-p.pageWidth/3, p.GetY()+7, p.pageWidth-p.horizontalPadding(font)*1.75+float64(font.TextSize())*2, p.GetY()+7)
 
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67 + 5)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67 + 5)
 	if err = p.Text("Amount Due"); err != nil {
 		return
 	}
 
 	p.SetX(p.pageWidth - p.hpad - p.pageWidth/3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67)
 	if err = p.Text("Due Date"); err != nil {
 		return
 	}
-	p.Line(p.pageWidth-p.hpad-p.pageWidth/3, p.GetY()+7, p.pageWidth-p.horizontalPadding(font)*1.75+float64(p.textSize)*2, p.GetY()+7)
+	p.Line(p.pageWidth-p.hpad-p.pageWidth/3, p.GetY()+7, p.pageWidth-p.horizontalPadding(font)*1.75+float64(font.TextSize())*2, p.GetY()+7)
 
 	p.SetY(p.pageHeight - (p.pageHeight / 3) + 20)
 	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*3)
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text(strings.Split(info.Payer.Name, "\n")[0]); err != nil {
@@ -294,19 +370,19 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 	}
 
 	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67)
 	if err = p.Text(info.InvoiceNumber); err != nil {
 		return
 	}
 
 	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67 + 5)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67 + 5)
 	if err = p.Text(info.Items.FormattedTotal()); err != nil {
 		return
 	}
 
 	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*3)
-	p.SetY(p.GetY() + float64(p.textSize)*1.67)
+	p.SetY(p.GetY() + float64(font.TextSize())*1.67)
 	if err = p.Text(info.DueDate.Format("2 Jan 2006")); err != nil {
 		return
 	}
@@ -315,14 +391,14 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 
 	p.SetX(p.pageWidth/2 - p.horizontalPadding(font)*2)
 	p.SetY(p.GetY() + p.verticalPadding(font)*1.5)
-	if err = p.setBold(p.textSize); err != nil {
+	if err = p.setBold(font.TextSize()); err != nil {
 		return
 	}
 	if err = p.Text("Payment Options"); err != nil {
 		return
 	}
 
-	if err = p.setRegular(p.textSize); err != nil {
+	if err = p.setRegular(font.TextSize()); err != nil {
 		return
 	}
 
@@ -352,18 +428,18 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 func (p *pdfBuilder) writeFooter(info *types.InvoiceDetails, font fonts.Font) error {
 	p.SetX(p.hpad)
 	p.SetY(p.pageHeight - p.verticalPadding(font)*1.5)
-	if err := p.setRegular(p.textSize - 2); err != nil {
+	if err := p.setRegular(font.TextSize() - 2); err != nil {
 		return err
 	}
 	return p.Text(fmt.Sprintf("Company Registration No: %s. Registered Office: %s", info.Payee.RegistrationNo, info.Payee.Address.String()))
 }
 
 func (p *pdfBuilder) horizontalPadding(font fonts.Font) float64 {
-	return p.pageWidth / (float64(p.textSize) * font.HorizontalPadModifier())
+	return p.pageWidth / (float64(font.TextSize()) * font.HorizontalPadModifier())
 }
 
 func (p *pdfBuilder) verticalPadding(font fonts.Font) float64 {
-	return p.pageHeight / (float64(p.textSize) * font.VerticalPadModifier())
+	return p.pageHeight / (float64(font.TextSize()) * font.VerticalPadModifier())
 }
 
 func (p *pdfBuilder) setRegular(size int) error {

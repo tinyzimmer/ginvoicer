@@ -83,6 +83,10 @@ var generateCommand = &cobra.Command{
 			return err
 		}
 
+		if config.Invoices.FontFamily != "" {
+			builder.SetFontFamily(config.Invoices.FontFamily)
+		}
+
 		invoiceNumberStr := config.FormatInvoiceNumber(invoiceNumber)
 
 		invoiceInfo := &types.InvoiceDetails{
@@ -97,9 +101,9 @@ var generateCommand = &cobra.Command{
 		output := outFile
 		if output == "" {
 			output = fmt.Sprintf("%s.pdf", invoiceNumberStr)
-		}
-		if config.InvoiceDirectory != "" {
-			output = filepath.Join(config.InvoiceDirectory, output)
+			if config.Invoices.Directory != "" {
+				output = filepath.Join(config.Invoices.Directory, output)
+			}
 		}
 
 		if err := builder.BuildAndWriteInvoice(invoiceInfo, output); err != nil {

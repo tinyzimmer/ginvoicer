@@ -17,13 +17,11 @@ func (h *hack) Load(pdf *gopdf.GoPdf) (err error) {
 			path:  "data/hack/Hack_B.ttf",
 			style: gopdf.Bold,
 		},
-		{
-			path:  "data/hack/Hack_I.ttf",
-			style: gopdf.Italic,
-		},
 	}
 	return loadToPDF(pdf, types.FontFamilyHack, opts...)
 }
 
 func (h *hack) VerticalPadModifier() float64   { return 6 }
-func (h *hack) HorizontalPadModifier() float64 { return 2 }
+func (h *hack) HorizontalPadModifier() float64 { return 1.9 }
+func (h *hack) TextSize() int                  { return 9 }
+func (h *hack) HeaderSize() int                { return 26 }

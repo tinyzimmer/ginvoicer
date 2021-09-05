@@ -6,7 +6,6 @@ import "time"
 // Currently only PDF is implemented.
 type Builder interface {
 	SetFontFamily(FontFamily)
-	SetCurrency(string)
 
 	BuildInvoice(*InvoiceDetails) error
 	WriteFile(path string) error

@@ -1,6 +1,8 @@
-invoicePrefix: "INV-"
-zeroPadding: 3
-invoiceDirectory: ~/Documents/Invoices
+invoices:
+  prefix: "INV-"
+  zeroPadding: 3
+  directory: ~/Documents/Invoices
+  fontFamily: Hack
 
 payee:
   name: TinyZimmerTech LTD

@@ -42,54 +42,69 @@ func (b *Billable) FormattedSubtotal() string {
 
 type BillableList []*Billable
 
-func (b BillableList) MaxQuantitySize() int {
+func (b BillableList) LongestQuantity() string {
 	var max int
+	var longest string
 	for _, i := range b {
-		if len(i.FormattedQuantity()) > max {
-			max = len(i.FormattedQuantity())
+		this := i.FormattedQuantity()
+		if len(this) > max {
+			longest = this
+			max = len(this)
 		}
 	}
-	return max
+	return longest
 }
 
-func (b BillableList) MaxUnitPriceSize() int {
+func (b BillableList) LongestUnitPrice() string {
 	var max int
+	var longest string
 	for _, i := range b {
-		if len(i.FormattedUnitPrice()) > max {
-			max = len(i.FormattedUnitPrice())
+		this := i.FormattedUnitPrice()
+		if len(this) > max {
+			longest = this
+			max = len(this)
 		}
 	}
-	return max
+	return longest
 }
 
-func (b BillableList) MaxDiscountSize() int {
+func (b BillableList) LongestDiscount() string {
 	var max int
+	var longest string
 	for _, i := range b {
-		if len(i.FormattedDiscount()) > max {
-			max = len(i.FormattedDiscount())
+		this := i.FormattedDiscount()
+		if len(this) > max {
+			longest = this
+			max = len(this)
 		}
 	}
-	return max
+	return longest
 }
 
-func (b BillableList) MaxTaxSize() int {
+func (b BillableList) LongestTax() string {
 	var max int
+	var longest string
 	for _, i := range b {
-		if len(i.FormattedTax()) > max {
-			max = len(i.FormattedTax())
+		this := i.FormattedTax()
+		if len(this) > max {
+			longest = this
+			max = len(this)
 		}
 	}
-	return max
+	return longest
 }
 
-func (b BillableList) MaxSubtotalSize() int {
+func (b BillableList) LongestSubtotal() string {
 	var max int
+	var longest string
 	for _, i := range b {
-		if len(i.FormattedSubtotal()) > max {
-			max = len(i.FormattedSubtotal())
+		this := i.FormattedSubtotal()
+		if len(this) > max {
+			longest = this
+			max = len(this)
 		}
 	}
-	return max
+	return longest
 }
 
 func (b BillableList) Subtotal() float64 {

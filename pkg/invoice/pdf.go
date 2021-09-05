@@ -9,11 +9,11 @@ import (
 
 type pdfBuilder struct {
 	*gopdf.GoPdf
-	*builder
 
-	hpad, vpad               float64
-	headerTextSize, textSize int
-	pageWidth, pageHeight    float64
+	currency              string
+	fontFamily            types.FontFamily
+	hpad, vpad            float64
+	pageWidth, pageHeight float64
 }
 
 func newPDFBuilder() (*pdfBuilder, error) {
@@ -22,23 +22,26 @@ func newPDFBuilder() (*pdfBuilder, error) {
 	pdf.Start(cfg)
 	pdf.AddPage()
 	return &pdfBuilder{
-		GoPdf: pdf,
-		builder: &builder{
-			currency:   "USD",
-			fontFamily: types.FontFamilyHack,
-		},
-		headerTextSize: 26,
-		textSize:       9,
-		vpad:           75,
-		hpad:           50,
-		pageWidth:      cfg.PageSize.W,
-		pageHeight:     cfg.PageSize.H,
+		GoPdf:      pdf,
+		currency:   "USD",
+		fontFamily: types.FontFamilyHack,
+		vpad:       70,
+		hpad:       30,
+		pageWidth:  cfg.PageSize.W,
+		pageHeight: cfg.PageSize.H,
 	}, nil
 }
+
+func (p *pdfBuilder) SetFontFamily(family types.FontFamily) { p.fontFamily = family }
 
 func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 	p.SetX(p.hpad)
 	p.SetY(p.vpad)
+
+	// Change currency if necessary
+	if info.Payer.Currency != "" {
+		p.currency = info.Payer.Currency
+	}
 
 	// Load the font family
 	font, err := fonts.GetFont(p.fontFamily)
@@ -66,7 +69,7 @@ func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 	// Jump down and write the due date
 
 	p.SetX(p.hpad)
-	p.SetY(p.GetY() + 40)
+	p.SetY(p.GetY() + 50)
 
 	if err = p.Text("Due Date: "); err != nil {
 		return
@@ -79,7 +82,7 @@ func (p *pdfBuilder) BuildInvoice(info *types.InvoiceDetails) (err error) {
 	p.SetLineType("dashed")
 	p.SetStrokeColor(0, 0, 0)
 	p.SetY(p.pageHeight - (p.pageHeight / 3))
-	p.Line(p.hpad-p.horizontalPadding(font)/2, p.GetY(), p.pageWidth-p.horizontalPadding(font)*1.5+float64(p.textSize)*2, p.GetY())
+	p.Line(p.hpad-p.horizontalPadding(font)/2, p.GetY(), p.pageWidth-p.horizontalPadding(font)*1.5+float64(font.TextSize())*2, p.GetY())
 
 	p.SetX(p.hpad)
 	p.SetY(p.GetY() + 30)
