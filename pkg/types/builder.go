@@ -1,14 +1,27 @@
 package types
 
-import "time"
+import (
+	"io"
+	"time"
+)
 
 // Builder represents an invoice builder saving to various formats.
 // Currently only PDF is implemented.
 type Builder interface {
+	// Builders can be used as readers after they have generated the invoice.
+	io.ReadCloser
+
+	// Set the font family to use when BuildInvoice is called.
 	SetFontFamily(FontFamily)
 
+	// Build an invoice with the given details
 	BuildInvoice(*InvoiceDetails) error
+
+	// Write the generated invoice to the given path
 	WriteFile(path string) error
+
+	// A convenience method for building an invoice and automatically
+	// writing it to an output file.
 	BuildAndWriteInvoice(info *InvoiceDetails, outpath string) error
 }
 

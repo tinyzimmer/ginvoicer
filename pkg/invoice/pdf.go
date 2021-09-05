@@ -18,7 +18,13 @@ type pdfBuilder struct {
 
 func newPDFBuilder() (*pdfBuilder, error) {
 	pdf := &gopdf.GoPdf{}
-	cfg := gopdf.Config{PageSize: *gopdf.PageSizeLetter}
+	cfg := gopdf.Config{
+		PageSize: *gopdf.PageSizeLetter,
+		Protection: gopdf.PDFProtectionConfig{
+			UseProtection: true,
+			Permissions:   gopdf.PermissionsPrint | gopdf.PermissionsCopy,
+		},
+	}
 	pdf.Start(cfg)
 	pdf.AddPage()
 	return &pdfBuilder{

@@ -1,5 +1,6 @@
 package types
 
+// Billable represents a billable item in an invoice.
 type Billable struct {
 	Alias       string  `json:"alias" yaml:"alias"`
 	Description string  `json:"description" yaml:"description"`
