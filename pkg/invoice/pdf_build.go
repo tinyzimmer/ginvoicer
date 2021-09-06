@@ -405,20 +405,28 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 	p.SetY(p.GetY() + p.verticalPadding(font)*1.15)
 	if info.Payee.BankAccount != nil {
 		p.SetX(p.pageWidth/4 + p.horizontalPadding(font))
-		p.Text("Bank Transfer")
+		if err = p.Text("Bank Transfer"); err != nil {
+			return err
+		}
 
 		p.SetX(p.pageWidth/4 + p.horizontalPadding(font)*1.5)
 		p.SetY(p.GetY() + p.verticalPadding(font))
-		p.Text("Account: " + info.Payee.BankAccount.AccountNumber)
+		if err = p.Text("Account: " + info.Payee.BankAccount.AccountNumber); err != nil {
+			return
+		}
 
 		p.SetX(p.pageWidth/4 + p.horizontalPadding(font)*1.5)
 		p.SetY(p.GetY() + p.verticalPadding(font))
-		p.Text("Routing: " + info.Payee.BankAccount.RoutingNumber)
+		if err = p.Text("Routing: " + info.Payee.BankAccount.RoutingNumber); err != nil {
+			return
+		}
 
 		for _, line := range info.Payee.BankAccount.Strings() {
 			p.SetX(p.pageWidth/4 + p.horizontalPadding(font)*2)
 			p.SetY(p.GetY() + p.verticalPadding(font))
-			p.Text(line)
+			if err = p.Text(line); err != nil {
+				return
+			}
 		}
 
 	}

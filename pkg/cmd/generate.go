@@ -27,7 +27,7 @@ func init() {
 	flags.StringVarP(&outFile, "output", "o", "", "path to write the invoice to (defaults to the format and locations in your configuration)")
 	flags.StringToIntVarP(&billables, "item", "i", map[string]int{}, "items to add to the invoice in the format of alias=quantity")
 
-	cobra.MarkFlagRequired(flags, "payer")
+	cobra.CheckErr(cobra.MarkFlagRequired(flags, "payer"))
 
 	rootCommand.AddCommand(generateCommand)
 }

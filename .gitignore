@@ -16,4 +16,5 @@
 
 *.pdf
 bin/
+dist/
 config.yaml
