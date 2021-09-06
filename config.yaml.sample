@@ -38,6 +38,17 @@ billables:
     description: Hourly Work
     unitPrice: 80
 
+  - alias: taxed-hourly
+    description: Taxed Hourly Work
+    unitPrice: 80
+    tax: 0.07
+
+  - alias: discounted-purchase
+    description: Discounted Purchase
+    unitPrice: 1000
+    discount: 0.1
+    tax: 0.07
+
   - alias: monthly
     description: Monthly Work
     unitPrice: 8000
