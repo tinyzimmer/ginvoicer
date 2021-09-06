@@ -30,3 +30,7 @@ dist-ginvoicer: $(GOX)
 		CGO_ENABLED=0 $(GOX) -osarch=$(COMPILE_TARGETS) -output=$(COMPILE_OUTPUT) -ldflags="$(LDFLAGS)"
 	upx -9 $(DIST)/*
 	cd dist && sha256sum * > ginvoicer.sha256sum
+
+license-headers:
+	for i in `find cmd/ -name '*.go'` ; do if ! grep -q Copyright $$i ; then cat hack/license-header.txt $$i > $$i.new && mv $$i.new $$i ; fi ; done
+	for i in `find pkg/ -name '*.go'` ; do if ! grep -q Copyright $$i ; then cat hack/license-header.txt $$i > $$i.new && mv $$i.new $$i ; fi ; done
