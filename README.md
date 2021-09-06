@@ -8,6 +8,8 @@ This is a very rough draft and there could still be bugs.
 
 ## CLI Usage
 
+You can download the CLI from the [releases](https://github.com/tinyzimmer/ginvoicer/releases) page or build it yourself by cloning this repository and running `make`.
+
 The CLI currently requires a YAML configuration (by default at `~/.ginvoicer/config.yaml`).
 The configuration is not well documented yet, but there is a sample [here](config.yaml.sample) and you can view the model [here](pkg/types/config.go).
 
