@@ -21,11 +21,22 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package types
 
 import (
+	"strings"
+
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
-func formatVal(val float64) string {
+func formatVal(val float64, cur string) string {
 	p := message.NewPrinter(language.English)
-	return p.Sprintf("%.02f", val)
+	text := p.Sprintf("%.02f", val)
+	if cur == "" {
+		return text
+	}
+	unit, err := currency.ParseISO(strings.ToUpper(cur))
+	if err != nil {
+		return text
+	}
+	return p.Sprintf("%v%s", currency.Symbol(unit), text)
 }

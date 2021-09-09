@@ -28,12 +28,11 @@ import (
 type Entity struct {
 	*Address `json:",inline" yaml:",inline"`
 
-	Alias       string       `json:"alias" yaml:"alias"`
-	BankAccount *BankAccount `json:"bankAccount" yaml:"bankAccount"`
-	// PayLinks       []string     `json:"payLinks" yaml:"payLinks"`
-	RegistrationNo string `json:"registrationNo" yaml:"registrationNo"`
-	Email          string `json:"email" yaml:"email"`
-	Currency       string `json:"currency" yaml:"currency"`
+	Alias          string       `json:"alias" yaml:"alias"`
+	BankAccount    *BankAccount `json:"bankAccount" yaml:"bankAccount"`
+	RegistrationNo string       `json:"registrationNo" yaml:"registrationNo"`
+	Email          string       `json:"email" yaml:"email"`
+	Currency       string       `json:"currency" yaml:"currency"`
 }
 
 type BankAccount struct {

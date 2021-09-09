@@ -37,7 +37,8 @@ func loadToPDF(pdf *gopdf.GoPdf, family types.FontFamily, opts ...fontOptions) e
 			return err
 		}
 		err = pdf.AddTTFFontByReaderWithOption(family.String(), f, gopdf.TtfOption{
-			Style: o.style,
+			Style:      o.style,
+			UseKerning: true,
 		})
 		if err != nil {
 			return err

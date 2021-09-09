@@ -39,26 +39,26 @@ func (b *Billable) Total() float64 {
 }
 
 func (b *Billable) FormattedQuantity() string {
-	return formatVal(b.Quantity)
+	return formatVal(b.Quantity, "")
 }
 
-func (b *Billable) FormattedUnitPrice() string {
-	return formatVal(b.UnitPrice)
+func (b *Billable) FormattedUnitPrice(currency string) string {
+	return formatVal(b.UnitPrice, currency)
 }
 
 func (b *Billable) FormattedDiscount() string {
-	return formatVal(b.Discount*100) + "%"
+	return formatVal(b.Discount*100, "") + "%"
 }
 
 func (b *Billable) FormattedTax() string {
 	if b.Tax == 0 {
 		return "Tax Exempt"
 	}
-	return formatVal(b.Tax*100) + "%"
+	return formatVal(b.Tax*100, "") + "%"
 }
 
-func (b *Billable) FormattedSubtotal() string {
-	return formatVal(b.Subtotal())
+func (b *Billable) FormattedSubtotal(currency string) string {
+	return formatVal(b.Subtotal(), currency)
 }
 
 type BillableList []*Billable
@@ -76,11 +76,11 @@ func (b BillableList) LongestQuantity() string {
 	return longest
 }
 
-func (b BillableList) LongestUnitPrice() string {
+func (b BillableList) LongestUnitPrice(currency string) string {
 	var max int
 	var longest string
 	for _, i := range b {
-		this := i.FormattedUnitPrice()
+		this := i.FormattedUnitPrice(currency)
 		if len(this) > max {
 			longest = this
 			max = len(this)
@@ -115,11 +115,11 @@ func (b BillableList) LongestTax() string {
 	return longest
 }
 
-func (b BillableList) LongestSubtotal() string {
+func (b BillableList) LongestSubtotal(currency string) string {
 	var max int
 	var longest string
 	for _, i := range b {
-		this := i.FormattedSubtotal()
+		this := i.FormattedSubtotal(currency)
 		if len(this) > max {
 			longest = this
 			max = len(this)
@@ -136,8 +136,8 @@ func (b BillableList) Subtotal() float64 {
 	return total
 }
 
-func (b BillableList) FormattedSubtotal() string {
-	return formatVal(b.Subtotal())
+func (b BillableList) FormattedSubtotal(currency string) string {
+	return formatVal(b.Subtotal(), currency)
 }
 
 func (b BillableList) Total() float64 {
@@ -148,6 +148,6 @@ func (b BillableList) Total() float64 {
 	return total
 }
 
-func (b BillableList) FormattedTotal() string {
-	return formatVal(b.Total())
+func (b BillableList) FormattedTotal(currency string) string {
+	return formatVal(b.Total(), currency)
 }

@@ -194,8 +194,8 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 		// Unit Price
 
 		p.SetY(baseY)
-		text = item.FormattedUnitPrice()
-		max = info.Items.LongestUnitPrice()
+		text = item.FormattedUnitPrice(info.Payer.Currency)
+		max = info.Items.LongestUnitPrice(info.Payer.Currency)
 		thisTextWidth, err = p.MeasureTextWidth(text)
 		if err != nil {
 			return
@@ -263,8 +263,8 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 		// Subtotal
 
 		p.SetY(baseY)
-		text = item.FormattedSubtotal()
-		max = info.Items.LongestSubtotal()
+		text = item.FormattedSubtotal(info.Payer.Currency)
+		max = info.Items.LongestSubtotal(info.Payer.Currency)
 		thisTextWidth, err = p.MeasureTextWidth(text)
 		if err != nil {
 			return
@@ -273,7 +273,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 		if err != nil {
 			return
 		}
-		p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*1.6 + (maxTextWidth - thisTextWidth))
+		p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*1.7 + (maxTextWidth - thisTextWidth))
 		if err = p.Text(text); err != nil {
 			return
 		}
@@ -292,7 +292,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 		return
 	}
 	p.SetX(p.GetX() + p.horizontalPadding(font))
-	if err = p.Text(info.Items.FormattedSubtotal()); err != nil {
+	if err = p.Text(info.Items.FormattedSubtotal(info.Payer.Currency)); err != nil {
 		return
 	}
 
@@ -308,7 +308,7 @@ func (p *pdfBuilder) writeInvoiceTable(info *types.InvoiceDetails, font fonts.Fo
 		return
 	}
 	p.SetX(p.GetX() + p.horizontalPadding(font))
-	if err = p.Text(info.Items.FormattedTotal()); err != nil {
+	if err = p.Text(info.Items.FormattedTotal(info.Payer.Currency)); err != nil {
 		return
 	}
 
@@ -397,7 +397,7 @@ func (p *pdfBuilder) writePaymentOptions(info *types.InvoiceDetails, font fonts.
 
 	p.SetX(p.pageWidth - p.hpad - p.horizontalPadding(font)*3)
 	p.SetY(p.GetY() + float64(font.TextSize())*1.67 + 5)
-	if err = p.Text(info.Items.FormattedTotal()); err != nil {
+	if err = p.Text(info.Items.FormattedTotal(info.Payer.Currency)); err != nil {
 		return
 	}
 
