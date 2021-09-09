@@ -30,6 +30,7 @@ payers:
     state: "Washington"
     zipCode: "98115"
     country: "United States"
+    currency: "USD"
     alias: my-client
 
 billables:
