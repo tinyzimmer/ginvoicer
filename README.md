@@ -26,6 +26,13 @@ Invoice written to INV-0000.pdf
 
 The invoice generated from the above command can be seen [here](examples/invoice.pdf).
 
+<details>
+    <summary>Click to see a zoomed out image</summary>
+
+![invoice](examples/invoice.png)
+</details>
+
+
 Invoice numbers will auto-increment based on your configuration `directory` unless specified explicitly with the `--number` flag.
 
 ```bash
