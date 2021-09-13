@@ -115,7 +115,7 @@ func main() {
 
     // The builder can either be used as a Reader or
     // dumped via the WriteFile method.
-    f, err := os.Create("invoice.pdf")
+    f, err := os.Create("examples/library-example.pdf")
     if err != nil {
         panic(err)
     }
@@ -123,8 +123,16 @@ func main() {
 
     // OR
 
-    if err := builder.WriteFile("invoice.pdf"); err != nil {
+    if err := builder.WriteFile("examples/library-example.pdf"); err != nil {
         panic(err)
     }
 }
 ```
+
+The invoice generated from the above code can be seen [here](examples/library-example.pdf).
+
+<details>
+    <summary>Click to see a zoomed out image</summary>
+
+![invoice](examples/library-example.png)
+</details>
