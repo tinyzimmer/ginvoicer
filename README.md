@@ -24,6 +24,8 @@ ginvoicer -c config.yaml.sample generate \
 Invoice written to INV-0000.pdf
 ```
 
+The invoice generated from the above command can be seen [here](examples/invoice.pdf).
+
 Invoice numbers will auto-increment based on your configuration `directory` unless specified explicitly with the `--number` flag.
 
 ```bash
