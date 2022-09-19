@@ -3,7 +3,7 @@ module github.com/tinyzimmer/ginvoicer
 go 1.17
 
 require (
-	github.com/signintech/gopdf v0.10.0
+	github.com/signintech/gopdf v0.15.0
 	github.com/spf13/cobra v1.2.1
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
